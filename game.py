@@ -14,11 +14,13 @@ class HyperMorpion(object):
         self._grid_winners = np.zeros((3,3))
         self.players = [player1,player2]
         self.next_macro_x,self.next_macro_y = 1,1
+        player1.set_player_number(1)
+        player2.set_player_number(2)
 
     def get_state_of_micro_grid(self,macroX,macroY):
         if self._grid_winners[macroX,macroY] != 0:
             return self._grid_winners[macroX,macroY]
-        self._grid_winners[macroX,macroY] = get_state_of_micro_grid(self._grid)
+        self._grid_winners[macroX,macroY] = get_state_of_micro_grid(self._grid,macroX,macroY)
         return self._grid_winners[macroX,macroY]
     
     def get_state_of_macro_grid(self):
@@ -63,24 +65,26 @@ class HyperMorpion(object):
     
     def play(self):
         continues = 0
-        while continues == 0:
+        continues2 = 0
+        while continues == 0 and continues2 == 0:
             for i,p in enumerate(self.players):
                 #os.system('cls' if os.name == 'nt' else 'clear')
                 self.print_board()
                 x,y = self.next_macro_x,self.next_macro_y
-                self.next_macro_x,self.next_macro_y = p.play(self._grid,self.next_macro_x,self.next_macro_y)
+                self.next_macro_x,self.next_macro_y = p.play(self._grid,x,y)
                 self._grid[x,y,self.next_macro_x,self.next_macro_y] = (i+1)
                 continues = self.get_state_of_macro_grid()
-                if continues != 0:
+                continues2 = is_filled_micro_grid(self._grid,self.next_macro_x,self.next_macro_y)
+                if continues != 0 or continues2:
                     break
         self.print_board()
-        if continues == -1:
+        if continues == -1 or (continues == 0 and continues2):
             print("Jeu nul.")
         else:
             print("Joueur",continues,"gagnant !")
 
 
-p1,p2 = StockFish("H1",1,2),StockFish("SF",2,5)
-#p1,p2 = HumanPlayer("H1",1),StockFish("SF",2,10)
+p1,p2 = StockFish("H1",5),StockFish("SF",5)
+#p1,p2 = HumanPlayer("H1"),StockFish("SF",10)
 game = HyperMorpion(p1,p2)
 game.play()

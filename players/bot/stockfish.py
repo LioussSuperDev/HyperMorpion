@@ -5,9 +5,8 @@ from player import Player
 from utils import *
 class StockFish(Player):
 
-    def __init__(self,name,player_number,depth):
+    def __init__(self,name,depth):
         self.name = name
-        self.player_number = player_number
         self.depth = depth
 
     def play(self, grid, macroX, macroY):
@@ -35,11 +34,11 @@ class StockFish(Player):
             score = 2
         else:
             score = 1
-
-        if macroX == macroY and macroX == 1:
-            score *= 5
-        elif macroX == macroY or abs(macroX-macroY) == 2:
-            score *= 2
+        if score != -1:
+            if macroX == macroY and macroX == 1:
+                score *= 5
+            elif macroX == macroY or abs(macroX-macroY) == 2:
+                score *= 2
 
         return score
     
@@ -54,9 +53,14 @@ class StockFish(Player):
                     _path = []
                     if depth >= 2 and abs(score) < 1000:
                         played = self._play(False, grid, i, j, depth-1, 3-player_number)
-                        score -= played[0]
-                        _path = played[3]
+                        if played[0] != None:
+                            score -= played[0]
+                            _path = played[3]
                     if bscore == None or score > bscore:
                         bx,by,bscore,path = i,j,score,_path
-                    
+        if bx == None:
+            for i in range(3):
+                for j in range(3):
+                    if (grid[macroX,macroY,i,j] == 0):
+                        bx,by,bscore,path = i,j,None,[]
         return bscore,bx,by,(path.copy()+[(bx,by)])

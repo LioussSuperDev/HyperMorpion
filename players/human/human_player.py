@@ -5,10 +5,6 @@ from player import Player
 
 class HumanPlayer(Player):
 
-    def __init__(self,name,player_number):
-        self.name = name
-        self.player_number = player_number
-
     def play(self, grid, macroX, macroY):
 
         valid = False
