@@ -15,33 +15,33 @@ class StockFish(Player):
         print("IA playing",(bx,by),"for a score of",bscore,"(path :",path,")")
         return bx,by
 
-    def evaluate(self,old_grid,grid,macroX,macroY,x,y,player_number):
+    def evaluate(self,old_grid,grid,macroX,macroY,x,y,player_number,defense_score=0.25):
         new_macro = get_state_of_macro_grid(grid)
         old = get_state_of_micro_grid(old_grid,macroX,macroY)
         new = get_state_of_micro_grid(grid,macroX,macroY)
 
-        score = 0
-
         if new_macro == player_number:
-            score = 999999
+            return 999999
+        elif new_macro == -1:
+            return -50
         elif (new == -1 and old == 0) or old == -1:
-            score = -1
-        elif new == player_number and old == 0:
-            score = 50
-        elif x == y and x == 1:
-            score = 5
-        elif x == y or abs(x-y) == 2:
-            score = 2
-        else:
-            score = 1
-        if score != -1:
-            if macroX == macroY and macroX == 1:
-                score *= 5
-            elif macroX == macroY or abs(macroX-macroY) == 2:
-                score *= 2
+            return -1
+        
+        maold = get_number_of_possible_lines_macro(old_grid,macroX,macroY,player_number)
+        maold2 = get_number_of_possible_lines_macro(old_grid,macroX,macroY,3-player_number)
+        manew2 = get_number_of_possible_lines_macro(grid,macroX,macroY,3-player_number)
+        maold,maold2,manew2 = maold[0]*maold[1],maold2[0]*maold[1],manew2[0]*maold[1]
 
-        return score
-    
+        if old == 0 and new == player_number:
+            return 50*((1-defense_score)*maold+defense_score*(maold2-manew2))
+        
+        miold = get_number_of_possible_lines_micro(old_grid,macroX,macroY,x,y,player_number)
+        miold2 = get_number_of_possible_lines_micro(old_grid,macroX,macroY,x,y,3-player_number)
+        minew2 = get_number_of_possible_lines_micro(grid,macroX,macroY,x,y,3-player_number)
+        miold,miold2,minew2 = miold[0]*miold[1],miold2[0]*miold2[1],minew2[0]*minew2[1]
+
+        return (1-defense_score)*miold*maold+defense_score*(miold2*maold2-minew2*manew2)
+
     def _play(self, first_turn, grid, macroX, macroY, depth, player_number):
         bx,by,bscore,path = None,None,None,[]
         for i in range(3):
